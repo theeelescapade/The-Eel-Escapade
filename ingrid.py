@@ -120,19 +120,20 @@ def main():
                 p.keyboard_control(event)
 
         if game_state.state == "gameon":
+            print(p.segments)
             head_x, head_y = p.get_head_pos()
             draw_bg(screen)
             p.move()
             head_x, head_y = p.get_head_pos()
 
-        if food.check_collision(head_x, head_y):
-            p.grow()
-            food.pos = food.generate_new_position()
-            red = random.randint(0, 255)
-            green = random.randint(0, 255)
-            blue = random.randint(0, 255)
-            color_tuple = (red, green, blue)
-            p.color = color_tuple
+            if food.check_collision(head_x, head_y):
+                p.grow()
+                food.pos = food.generate_new_position()
+                red = random.randint(0, 255)
+                green = random.randint(0, 255)
+                blue = random.randint(0, 255)
+                color_tuple = (red, green, blue)
+                p.color = color_tuple
 
             p.display()
             food.display()
