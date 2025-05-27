@@ -3,6 +3,8 @@ import pygame
 import math
 import random
 
+import game_state
+
 class Player:
     def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int) -> None:
         self.surface = surface
@@ -16,8 +18,11 @@ class Player:
 
     def move(self) -> None:
         dx, dy = self.direction
-        new_x = max(0, min(COLS - 1, self.grid_x + dx))
-        new_y = max(0, min(ROWS - 1, self.grid_y + dy))
+        new_x = self.grid_x + dx
+        new_y = self.grid_y + dy
+        if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
+            game_state.state = "gameover"
+            return
 
         if (new_x, new_y) != (self.grid_x, self.grid_y):
             self.grid_x, self.grid_y = new_x, new_y
@@ -93,8 +98,13 @@ def draw_bg(surface: pygame.Surface):
 def main():
     pygame.init()
     fps = 6  
-    fps_clock = pygame.time.Clock()
+    fps_clock = pygame.time.Clock() 
+    text_font = pygame.font.SysFont("Arial", 30)
 
+    def draw_text (text,font,text_col, x, y):
+        img = font.render(text, True, text_col)
+        screen.blit(img, (x, y))
+    
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     p = Player(screen, COLS // 2, ROWS // 2)
     food = SeaUrchin(screen)
@@ -109,9 +119,11 @@ def main():
             else:
                 p.keyboard_control(event)
 
-        draw_bg(screen)
-        p.move()
-        head_x, head_y = p.get_head_pos()
+        if game_state.state == "gameon":
+            head_x, head_y = p.get_head_pos()
+            draw_bg(screen)
+            p.move()
+            head_x, head_y = p.get_head_pos()
 
         if food.check_collision(head_x, head_y):
             p.grow()
@@ -122,8 +134,19 @@ def main():
             color_tuple = (red, green, blue)
             p.color = color_tuple
 
-        p.display()
-        food.display()
+            p.display()
+            food.display()
+
+        elif game_state.state == "gameover":
+            user_text = 'Game Over' 
+            screen.fill((0,0,0))
+            draw_text("Game Over", text_font, (255,255,255), WIDTH//2 , HEIGHT//2)
+
+             #display game over pygame screen here
+             #https://www.youtube.com/watch?v=ndtFoWWBAoE for text display??
+
+
+        #need to also debug that when playing game if you hit any other key the snake will stop
 
         pygame.display.flip()
         fps_clock.tick(fps)
