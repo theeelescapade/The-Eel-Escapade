@@ -141,7 +141,12 @@ def main():
 
             p.display()
             food.display()
-            draw_text(f"Score: {len(p.segments) - 3}", text_font, (255,255,255), 20, 20)
+            score = len(p.segments) - 3
+            level = score // 10 + 1
+            draw_text(f"Score: {score}", text_font, (255, 255, 255), 20, 20)
+            draw_text(f"Level: {level}", text_font, (255, 255, 255), 170, 20)
+            fps = 6 + (level - 1)
+
 
         elif game_state.state == "gameover":
             user_text = 'Game Over' 
