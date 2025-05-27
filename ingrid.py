@@ -50,6 +50,7 @@ class Player:
         elif event.type == pygame.KEYUP:
             if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
                 self.dx, self.dy = 0, 0
+        
 
     def display(self) -> None:
         for sx, sy in self.segments:
