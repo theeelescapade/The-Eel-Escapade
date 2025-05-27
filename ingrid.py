@@ -16,6 +16,7 @@ class Player:
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
 
+
     def move(self) -> None:
         dx, dy = self.direction
         new_x = self.grid_x + dx
@@ -105,6 +106,10 @@ def main():
         img = font.render(text, True, text_col)
         screen.blit(img, (x, y))
     
+
+    
+
+    
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     p = Player(screen, COLS // 2, ROWS // 2)
     food = SeaUrchin(screen)
@@ -120,7 +125,6 @@ def main():
                 p.keyboard_control(event)
 
         if game_state.state == "gameon":
-            print(p.segments)
             head_x, head_y = p.get_head_pos()
             draw_bg(screen)
             p.move()
@@ -137,11 +141,15 @@ def main():
 
             p.display()
             food.display()
+            draw_text(f"Score: {len(p.segments) - 3}", text_font, (255,255,255), 20, 20)
 
         elif game_state.state == "gameover":
             user_text = 'Game Over' 
             screen.fill((0,0,0))
             draw_text("Game Over", text_font, (255,255,255), WIDTH//2 , HEIGHT//2)
+        
+
+        
 
              #display game over pygame screen here
              #https://www.youtube.com/watch?v=ndtFoWWBAoE for text display??
