@@ -9,6 +9,10 @@ ROWS, COLS = 16, 16
 TILE_WIDTH = WIDTH // COLS
 TILE_HEIGHT = HEIGHT // ROWS
 
+f = open("highscore.txt", "r")
+high_score = int(f.read())      
+f.close()
+
 class Player:
     def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int) -> None:
         self.surface = surface
@@ -18,10 +22,12 @@ class Player:
         self.last_direction = (0, 1)  
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
-
         dx, dy = -self.last_direction[0], -self.last_direction[1]
         self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
-        self.grid_x, self.grid_y = self.segments[0]
+        self.grid_x, self.grid_y = self.segments[0]        
+        pygame.display.set_caption("The Eel Escapade")
+    
+ 
 
         self.first_move_done = False  
 
@@ -31,8 +37,15 @@ class Player:
         new_y = self.grid_y + dy
 
         if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
-            game_state.state = "gameover"
-            return
+            game_state.lives -= 1
+            if game_state.lives <= 0:
+                game_state.state = "gameover"
+            else:
+                self.grid_x, self.grid_y = COLS // 2, ROWS // 2
+                self.segments = [(self.grid_x, self.grid_y)]
+                self.direction = (0, 0)
+                self.last_direction = (0, 0)
+
 
         if (new_x, new_y) in self.segments[1:]:
             game_state.state = "gameover"
@@ -107,6 +120,7 @@ def draw_bg(surface: pygame.Surface):
             )
 
 def main():
+    global high_score
     pygame.init()
     fps = 6
     fps_clock = pygame.time.Clock()
@@ -115,7 +129,12 @@ def main():
     def draw_text(text, font, text_col, x, y):
         img = font.render(text, True, text_col)
         screen.blit(img, (x, y))
-    
+
+    def draw_lives(lives, font, x, y, spacing=30, heart_color=(255, 0, 0)):
+        for i in range(lives):
+            heart = font.render("♥", True, heart_color)
+            screen.blit(heart, (x + i * spacing, y))
+
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     def new_game():
@@ -154,10 +173,18 @@ def main():
             p.display()
             food.display()
             score = len(p.segments) - 3
+            if score > high_score:
+                high_score = score
             level = score // 10 + 1
-            draw_text(f"Score: {score}", text_font, (255, 255, 255), 20, 20)
-            draw_text(f"Level: {level}", text_font, (255, 255, 255), 170, 20)
+            draw_text(f"Score: {score}", text_font, (255, 255, 255), 10, 10)
+            draw_text(f"Level: {level}", text_font, (255, 255, 255), 140, 10)
+            draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 250, 10)
+            # draw_text("\u2665", text_font, (255, 255, 255), 110, 475)
+            draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
+            draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
+            
+            
 
         elif game_state.state == "wait":
             screen.fill((0, 0, 0))
@@ -170,6 +197,10 @@ def main():
 
         pygame.display.flip()
         fps_clock.tick(fps)
+
+    f = open("highscore.txt", "w")
+    f.write(str(high_score))
+    f.close()
 
     pygame.quit()
 
