@@ -10,7 +10,7 @@ class Player:
         self.surface = surface
         self.grid_x = grid_x
         self.grid_y = grid_y
-        self.direction = (0, 0)  
+        self.direction = (0, 0)
         self.last_direction = self.direction
         self.segments = [(self.grid_x, self.grid_y)]
         self.max_segments = 3
@@ -34,26 +34,27 @@ class Player:
         self.max_segments += amount
 
     def keyboard_control(self, event: pygame.event.Event) -> None:
-        if event.type == pygame.KEYDOWN:
-            dx, dy = 0, 0
-            if event.key == pygame.K_UP:
-                dx, dy = 0, -1
-            elif event.key == pygame.K_DOWN:
-                dx, dy = 0, 1
-            elif event.key == pygame.K_LEFT:
-                dx, dy = -1, 0
-            elif event.key == pygame.K_RIGHT:
-                dx, dy = 1, 0
+        dx, dy = 0, 0
+        if event.key == pygame.K_UP:
+            dx, dy = 0, -1
+        elif event.key == pygame.K_DOWN:
+            dx, dy = 0, 1
+        elif event.key == pygame.K_LEFT:
+            dx, dy = -1, 0
+        elif event.key == pygame.K_RIGHT:
+            dx, dy = 1, 0
 
-            if (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
-                self.direction = (dx, dy)
-                self.last_direction = (dx, dy)
+        if (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
+            self.direction = (dx, dy)
+            self.last_direction = (dx, dy)
 
     def display(self) -> None:
         for x, y in self.segments:
             screen_x = x * TILE_WIDTH + TILE_WIDTH // 2
             screen_y = y * TILE_HEIGHT + TILE_HEIGHT // 2
-            pygame.draw.circle(self.surface, self.color, (screen_x, screen_y), TILE_WIDTH // 2)
+            pygame.draw.circle(
+                self.surface, self.color, (screen_x, screen_y), TILE_WIDTH // 2
+            )
 
     def get_head_pos(self):
         head_x = self.grid_x * TILE_WIDTH + TILE_WIDTH // 2
@@ -69,11 +70,15 @@ class SeaUrchin:
     def generate_new_position(self):
         grid_x = random.randint(0, COLS - 1)
         grid_y = random.randint(0, ROWS - 1)
-        return (grid_x * TILE_WIDTH + TILE_WIDTH // 2,
-                grid_y * TILE_HEIGHT + TILE_HEIGHT // 2)
+        return (
+            grid_x * TILE_WIDTH + TILE_WIDTH // 2,
+            grid_y * TILE_HEIGHT + TILE_HEIGHT // 2,
+        )
 
     def display(self):
-        pygame.draw.circle(self.surface, (255, 0, 0), (int(self.pos[0]), int(self.pos[1])), 10)
+        pygame.draw.circle(
+            self.surface, (255, 0, 0), (int(self.pos[0]), int(self.pos[1])), 10
+        )
 
     def check_collision(self, head_x, head_y) -> bool:
         dist = math.hypot(head_x - self.pos[0], head_y - self.pos[1])
@@ -85,6 +90,7 @@ ROWS, COLS = 16, 16
 TILE_WIDTH = WIDTH // COLS
 TILE_HEIGHT = HEIGHT // ROWS
 
+
 def draw_bg(surface: pygame.Surface):
     for row in range(ROWS):
         for col in range(COLS):
@@ -95,29 +101,30 @@ def draw_bg(surface: pygame.Surface):
                 (col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
             )
 
+
 def main():
     pygame.init()
-    fps = 6  
-    fps_clock = pygame.time.Clock() 
+    fps = 6
+    fps_clock = pygame.time.Clock()
     text_font = pygame.font.SysFont("Arial", 30)
 
-    def draw_text (text,font,text_col, x, y):
+    def draw_text(text, font, text_col, x, y):
         img = font.render(text, True, text_col)
         screen.blit(img, (x, y))
-    
+
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     p = Player(screen, COLS // 2, ROWS // 2)
     food = SeaUrchin(screen)
-
-
 
     run = True
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            else:
+            elif event.type == pygame.KEYDOWN:
                 p.keyboard_control(event)
+                if game_state.state == "gameover" and event.key == pygame.K_SPACE:
+                    game_state.state = "gameon" 
 
         if game_state.state == "gameon":
             print(p.segments)
@@ -139,20 +146,20 @@ def main():
             food.display()
 
         elif game_state.state == "gameover":
-            user_text = 'Game Over' 
-            screen.fill((0,0,0))
-            draw_text("Game Over", text_font, (255,255,255), WIDTH//2 , HEIGHT//2)
+            user_text = "Game Over"
+            screen.fill((0, 0, 0))
+            draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2, HEIGHT // 2)
 
-             #display game over pygame screen here
-             #https://www.youtube.com/watch?v=ndtFoWWBAoE for text display??
+            # display game over pygame screen here
+            # https://www.youtube.com/watch?v=ndtFoWWBAoE for text display??
 
-
-        #need to also debug that when playing game if you hit any other key the snake will stop
+        # need to also debug that when playing game if you hit any other key the snake will stop
 
         pygame.display.flip()
         fps_clock.tick(fps)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
