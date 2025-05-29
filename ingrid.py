@@ -19,14 +19,17 @@ class Player:
         self.grid_x = grid_x
         self.grid_y = grid_y
         self.direction = (0, 0)
-        self.last_direction = (0, 1)
+        self.last_direction = (0, 1)  
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
-        self.segments = [(self.grid_x, self.grid_y - i) for i in range(self.max_segments)]
+        dx, dy = -self.last_direction[0], -self.last_direction[1]
+        self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
         self.grid_x, self.grid_y = self.segments[0]        
         pygame.display.set_caption("The Eel Escapade")
     
  
+
+        self.first_move_done = False  
 
     def move(self) -> None:
         dx, dy = self.direction
@@ -69,9 +72,13 @@ class Player:
                 elif event.key == pygame.K_RIGHT:
                     dx, dy = 1, 0
 
-                if (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
+                if not self.first_move_done and (dx, dy) == (0, -1):
+                    return
+
+                if self.direction == (0, 0) or (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
                     self.direction = (dx, dy)
                     self.last_direction = (dx, dy)
+                    self.first_move_done = True  
 
     def display(self) -> None:
         for x, y in self.segments:
@@ -136,10 +143,13 @@ def main():
             screen.blit(heart, (x + i * spacing, y))
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    p = Player(screen, COLS // 2, ROWS // 2)
-    food = SeaUrchin(screen)
 
-    game_state.state = "wait"  
+    def new_game():
+        return Player(screen, COLS // 2, ROWS // 2), SeaUrchin(screen)
+
+    p, food = new_game()
+    game_state.state = "wait"
+    
     run = True
     while run:
         for event in pygame.event.get():
@@ -151,8 +161,10 @@ def main():
                         game_state.state = "gameon"
                 elif game_state.state == "gameon":
                     p.keyboard_control(event)
-                    if game_state.state == "gameover" and event.key == pygame.K_SPACE:
-                        game_state.state = "gameon" 
+                elif game_state.state == "gameover":
+                    if event.key == pygame.K_r:
+                        p, food = new_game()
+                        game_state.state = "wait"
 
         if game_state.state == "gameon":
             draw_bg(screen)
@@ -163,16 +175,7 @@ def main():
             if food.check_collision(head_x, head_y):
                 p.grow()
                 food.pos = food.generate_new_position()
-                red = random.randint(0, 255)
-                green = random.randint(0, 255)
-                blue = random.randint(0, 255)
-                color_tuple = (red, green, blue)
-                p.color = color_tuple
-                red = random.randint(0, 255)
-                green = random.randint(0, 255)
-                blue = random.randint(0, 255)
-                color_tuple = (red, green, blue)
-                p.color = color_tuple
+                p.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
             p.display()
             food.display()
@@ -190,25 +193,14 @@ def main():
             
             
 
-
         elif game_state.state == "wait":
             screen.fill((0, 0, 0))
             draw_text("Press SPACE to Start", text_font, (255, 255, 255), WIDTH // 2 - 140, HEIGHT // 2)
 
         elif game_state.state == "gameover":
-            user_text = 'Game Over' 
-            screen.fill((0,0,0))
-        
-            draw_text("Game Over", text_font, (255,255,255), 190, 256)
-            
-        
-
-        
-
-            # display game over pygame screen here
-            # https://www.youtube.com/watch?v=ndtFoWWBAoE for text display??
-
-        # need to also debug that when playing game if you hit any other key the snake will stop
+            screen.fill((0, 0, 0))
+            draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2 - 70, HEIGHT // 2)
+            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 110, HEIGHT // 2 + 40)
 
         pygame.display.flip()
         fps_clock.tick(fps)
