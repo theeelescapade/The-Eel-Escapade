@@ -184,7 +184,7 @@ def main():
                 prev_segments = p.segments[:]
                 prev_max_segments = p.max_segments
                 p.move()
-                if game_state.state == "gameon":  # only update if still alive
+                if game_state.state == "gameon":  
                     head_x, head_y = p.get_head_pos()
                     if food.check_collision(head_x, head_y):
                         p.grow()
@@ -193,7 +193,7 @@ def main():
                     score = len(p.segments) - 3
                     level = score // 10 + 1
                 else:
-                    # Restore previous position/state after hit
+                    
                     p.grid_x, p.grid_y = prev_pos
                     p.segments = prev_segments
                     p.max_segments = prev_max_segments
