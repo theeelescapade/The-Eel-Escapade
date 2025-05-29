@@ -17,6 +17,8 @@ class Player:
         self.direction = (0, 0)
         self.last_direction = (0, 1)
         self.max_segments = 3
+        self.color: tuple[int, int, int] = (0, 0, 255)
+
         self.segments = [(self.grid_x, self.grid_y - i) for i in range(self.max_segments)]
         self.grid_x, self.grid_y = self.segments[0]
 
@@ -62,7 +64,7 @@ class Player:
         for x, y in self.segments:
             screen_x = x * TILE_WIDTH + TILE_WIDTH // 2
             screen_y = y * TILE_HEIGHT + TILE_HEIGHT // 2
-            pygame.draw.circle(self.surface, (0, 0, 255), (screen_x, screen_y), TILE_WIDTH // 2)
+            pygame.draw.circle(self.surface, self.color, (screen_x, screen_y), TILE_WIDTH // 2)
 
     def get_head_pos(self):
         head_x = self.grid_x * TILE_WIDTH + TILE_WIDTH // 2
@@ -106,10 +108,12 @@ def main():
     def draw_text(text, font, text_col, x, y):
         img = font.render(text, True, text_col)
         screen.blit(img, (x, y))
-
+    
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     p = Player(screen, COLS // 2, ROWS // 2)
     food = SeaUrchin(screen)
+
+
 
     game_state.state = "wait"  # Must press SPACE to start
     run = True
@@ -133,9 +137,20 @@ def main():
             if food.check_collision(head_x, head_y):
                 p.grow()
                 food.pos = food.generate_new_position()
+                red = random.randint(0, 255)
+                green = random.randint(0, 255)
+                blue = random.randint(0, 255)
+                color_tuple = (red, green, blue)
+                p.color = color_tuple
 
             p.display()
             food.display()
+            score = len(p.segments) - 3
+            level = score // 10 + 1
+            draw_text(f"Score: {score}", text_font, (255, 255, 255), 20, 20)
+            draw_text(f"Level: {level}", text_font, (255, 255, 255), 170, 20)
+            fps = 6 + (level - 1)
+
 
         elif game_state.state == "wait":
             screen.fill((0, 0, 0))
@@ -151,4 +166,4 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
-    main() 
+    main()
