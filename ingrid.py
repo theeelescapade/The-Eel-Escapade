@@ -186,7 +186,6 @@ def main():
             draw_text(f"Score: {score}", text_font, (255, 255, 255), 10, 10)
             draw_text(f"Level: {level}", text_font, (255, 255, 255), 140, 10)
             draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 250, 10)
-            # draw_text("\u2665", text_font, (255, 255, 255), 110, 475)
             draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
             draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
@@ -200,7 +199,7 @@ def main():
         elif game_state.state == "gameover":
             screen.fill((0, 0, 0))
             draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2 - 70, HEIGHT // 2)
-            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 110, HEIGHT // 2 + 40)
+         
 
         pygame.display.flip()
         fps_clock.tick(fps)
