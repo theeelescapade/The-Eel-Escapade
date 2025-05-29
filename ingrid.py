@@ -2,8 +2,12 @@ import sys
 import pygame
 import math
 import random
-
 import game_state
+
+WIDTH, HEIGHT = 512, 512
+ROWS, COLS = 16, 16
+TILE_WIDTH = WIDTH // COLS
+TILE_HEIGHT = HEIGHT // ROWS
 
 f = open("highscore.txt", "r")
 high_score = int(f.read())      
@@ -14,11 +18,12 @@ class Player:
         self.surface = surface
         self.grid_x = grid_x
         self.grid_y = grid_y
-        self.direction = (0, 0)  
-        self.last_direction = self.direction
-        self.segments = [(self.grid_x, self.grid_y)]
+        self.direction = (0, 0)
+        self.last_direction = (0, 1)
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
+        self.segments = [(self.grid_x, self.grid_y - i) for i in range(self.max_segments)]
+        self.grid_x, self.grid_y = self.segments[0]        
         pygame.display.set_caption("The Eel Escapade")
     
  
@@ -27,6 +32,7 @@ class Player:
         dx, dy = self.direction
         new_x = self.grid_x + dx
         new_y = self.grid_y + dy
+
         if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
             game_state.lives -= 1
             if game_state.lives <= 0:
@@ -38,30 +44,34 @@ class Player:
                 self.last_direction = (0, 0)
 
 
-        if (new_x, new_y) != (self.grid_x, self.grid_y):
-            self.grid_x, self.grid_y = new_x, new_y
-            self.segments.insert(0, (self.grid_x, self.grid_y))
-            if len(self.segments) > self.max_segments:
-                self.segments.pop()
+        if (new_x, new_y) in self.segments[1:]:
+            game_state.state = "gameover"
+            return
+
+        self.grid_x, self.grid_y = new_x, new_y
+        self.segments.insert(0, (self.grid_x, self.grid_y))
+        if len(self.segments) > self.max_segments:
+            self.segments.pop()
 
     def grow(self, amount: int = 1) -> None:
         self.max_segments += amount
 
     def keyboard_control(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
-            dx, dy = 0, 0
-            if event.key == pygame.K_UP:
-                dx, dy = 0, -1
-            elif event.key == pygame.K_DOWN:
-                dx, dy = 0, 1
-            elif event.key == pygame.K_LEFT:
-                dx, dy = -1, 0
-            elif event.key == pygame.K_RIGHT:
-                dx, dy = 1, 0
+            if event.key in [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]:
+                dx, dy = 0, 0
+                if event.key == pygame.K_UP:
+                    dx, dy = 0, -1
+                elif event.key == pygame.K_DOWN:
+                    dx, dy = 0, 1
+                elif event.key == pygame.K_LEFT:
+                    dx, dy = -1, 0
+                elif event.key == pygame.K_RIGHT:
+                    dx, dy = 1, 0
 
-            if (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
-                self.direction = (dx, dy)
-                self.last_direction = (dx, dy)
+                if (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
+                    self.direction = (dx, dy)
+                    self.last_direction = (dx, dy)
 
     def display(self) -> None:
         for x, y in self.segments:
@@ -73,7 +83,6 @@ class Player:
         head_x = self.grid_x * TILE_WIDTH + TILE_WIDTH // 2
         head_y = self.grid_y * TILE_HEIGHT + TILE_HEIGHT // 2
         return head_x, head_y
-
 
 class SeaUrchin:
     def __init__(self, surface: pygame.Surface):
@@ -93,12 +102,6 @@ class SeaUrchin:
         dist = math.hypot(head_x - self.pos[0], head_y - self.pos[1])
         return dist < TILE_WIDTH // 2
 
-
-WIDTH, HEIGHT = 512, 512
-ROWS, COLS = 16, 16
-TILE_WIDTH = WIDTH // COLS
-TILE_HEIGHT = HEIGHT // ROWS
-
 def draw_bg(surface: pygame.Surface):
     for row in range(ROWS):
         for col in range(COLS):
@@ -112,11 +115,11 @@ def draw_bg(surface: pygame.Surface):
 def main():
     global high_score
     pygame.init()
-    fps = 6  
-    fps_clock = pygame.time.Clock() 
+    fps = 6
+    fps_clock = pygame.time.Clock()
     text_font = pygame.font.SysFont("Arial", 30)
 
-    def draw_text (text,font,text_col, x, y):
+    def draw_text(text, font, text_col, x, y):
         img = font.render(text, True, text_col)
         screen.blit(img, (x, y))
 
@@ -125,30 +128,27 @@ def main():
             heart = font.render("♥", True, heart_color)
             screen.blit(heart, (x + i * spacing, y))
 
-    
-    
-
-    
-
-    
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     p = Player(screen, COLS // 2, ROWS // 2)
     food = SeaUrchin(screen)
 
-
-
+    game_state.state = "wait"  
     run = True
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            else:
-                p.keyboard_control(event)
+            elif event.type == pygame.KEYDOWN:
+                if game_state.state == "wait":
+                    if event.key == pygame.K_SPACE:
+                        game_state.state = "gameon"
+                elif game_state.state == "gameon":
+                    p.keyboard_control(event)
 
         if game_state.state == "gameon":
-            head_x, head_y = p.get_head_pos()
             draw_bg(screen)
-            p.move()
+            if p.direction != (0, 0):
+                p.move()
             head_x, head_y = p.get_head_pos()
 
             if food.check_collision(head_x, head_y):
@@ -177,6 +177,9 @@ def main():
             
 
 
+        elif game_state.state == "wait":
+            screen.fill((0, 0, 0))
+            draw_text("Press SPACE to Start", text_font, (255, 255, 255), WIDTH // 2 - 140, HEIGHT // 2)
 
         elif game_state.state == "gameover":
             user_text = 'Game Over' 
@@ -206,4 +209,4 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
-    main()
+    main() 
