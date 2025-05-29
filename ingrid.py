@@ -2,16 +2,26 @@ import sys
 import pygame
 import math
 import random
+import os
 import game_state
+
 
 WIDTH, HEIGHT = 512, 512
 ROWS, COLS = 16, 16
 TILE_WIDTH = WIDTH // COLS
 TILE_HEIGHT = HEIGHT // ROWS
 
+
 f = open("highscore.txt", "r")
 high_score = int(f.read())      
 f.close()
+
+class GameState:
+    def __init__(self):
+        self.state = "wait"
+        self.lives = 3
+
+game_state = GameState()  
 
 class Player:
     def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int) -> None:
@@ -26,15 +36,13 @@ class Player:
         self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
         self.grid_x, self.grid_y = self.segments[0]        
         pygame.display.set_caption("The Eel Escapade")
-    
- 
-
         self.first_move_done = False  
 
     def move(self) -> None:
         dx, dy = self.direction
         new_x = self.grid_x + dx
         new_y = self.grid_y + dy
+
 
         if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
             game_state.lives -= 1
@@ -45,6 +53,7 @@ class Player:
                 self.segments = [(self.grid_x, self.grid_y)]
                 self.direction = (0, 0)
                 self.last_direction = (0, 0)
+            return
 
 
         if (new_x, new_y) in self.segments[1:]:
@@ -125,7 +134,6 @@ def draw_bg(surface: pygame.Surface):
                 (col * TILE_WIDTH, row * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT),
             )
 
-
 def main():
     global high_score
     pygame.init()
@@ -145,6 +153,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     def new_game():
+        game_state.lives = 3
         return Player(screen, COLS // 2, ROWS // 2), SeaUrchin(screen)
 
     p, food = new_game()
@@ -189,8 +198,6 @@ def main():
             draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
             draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
-            
-            
 
         elif game_state.state == "wait":
             screen.fill((0, 0, 0))
@@ -199,7 +206,7 @@ def main():
         elif game_state.state == "gameover":
             screen.fill((0, 0, 0))
             draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2 - 70, HEIGHT // 2)
-         
+            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 120, HEIGHT // 2 + 40)
 
         pygame.display.flip()
         fps_clock.tick(fps)
