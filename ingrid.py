@@ -5,15 +5,13 @@ import random
 import os
 import game_state
 
-
 WIDTH, HEIGHT = 512, 512
 ROWS, COLS = 16, 16
 TILE_WIDTH = WIDTH // COLS
 TILE_HEIGHT = HEIGHT // ROWS
 
-
 f = open("highscore.txt", "r")
-high_score = int(f.read())      
+high_score = int(f.read())
 f.close()
 
 class GameState:
@@ -21,7 +19,7 @@ class GameState:
         self.state = "wait"
         self.lives = 3
 
-game_state = GameState()  
+game_state = GameState()
 
 class Player:
     def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int) -> None:
@@ -29,35 +27,34 @@ class Player:
         self.grid_x = grid_x
         self.grid_y = grid_y
         self.direction = (0, 0)
-        self.last_direction = (0, 1)  
+        self.last_direction = (0, 1)
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
         dx, dy = -self.last_direction[0], -self.last_direction[1]
         self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
-        self.grid_x, self.grid_y = self.segments[0]        
+        self.grid_x, self.grid_y = self.segments[0]
+        self.first_move_done = False
         pygame.display.set_caption("The Eel Escapade")
-        self.first_move_done = False  
 
     def move(self) -> None:
         dx, dy = self.direction
         new_x = self.grid_x + dx
         new_y = self.grid_y + dy
 
-
         if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
             game_state.lives -= 1
             if game_state.lives <= 0:
                 game_state.state = "gameover"
             else:
-                self.grid_x, self.grid_y = COLS // 2, ROWS // 2
-                self.segments = [(self.grid_x, self.grid_y)]
                 self.direction = (0, 0)
-                self.last_direction = (0, 0)
             return
 
-
         if (new_x, new_y) in self.segments[1:]:
-            game_state.state = "gameover"
+            game_state.lives -= 1
+            if game_state.lives <= 0:
+                game_state.state = "gameover"
+            else:
+                self.direction = (0, 0)
             return
 
         self.grid_x, self.grid_y = new_x, new_y
@@ -87,14 +84,14 @@ class Player:
                 if self.direction == (0, 0) or (dx, dy) != (-self.last_direction[0], -self.last_direction[1]):
                     self.direction = (dx, dy)
                     self.last_direction = (dx, dy)
-                    self.first_move_done = True  
+                    self.first_move_done = True
 
     def display(self) -> None:
         for x, y in self.segments:
             screen_x = x * TILE_WIDTH
             screen_y = y * TILE_HEIGHT
             pygame.draw.rect(
-                self.surface, self.color, (screen_x, screen_y,TILE_WIDTH, TILE_HEIGHT)
+                self.surface, self.color, (screen_x, screen_y, TILE_WIDTH, TILE_HEIGHT)
             )
 
     def get_head_pos(self):
@@ -153,12 +150,14 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     def new_game():
-        game_state.lives = 3
         return Player(screen, COLS // 2, ROWS // 2), SeaUrchin(screen)
 
     p, food = new_game()
     game_state.state = "wait"
-    
+    game_state.lives = 3
+    score = 0
+    level = 1
+
     run = True
     while run:
         for event in pygame.event.get():
@@ -174,39 +173,51 @@ def main():
                     if event.key == pygame.K_r:
                         p, food = new_game()
                         game_state.state = "wait"
+                        game_state.lives = 3
+                        score = 0
+                        p.max_segments = 3
 
         if game_state.state == "gameon":
             draw_bg(screen)
             if p.direction != (0, 0):
+                prev_pos = p.grid_x, p.grid_y
+                prev_segments = p.segments[:]
+                prev_max_segments = p.max_segments
                 p.move()
-            head_x, head_y = p.get_head_pos()
-
-            if food.check_collision(head_x, head_y):
-                p.grow()
-                food.pos = food.generate_new_position()
-                p.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                if game_state.state == "gameon":  # only update if still alive
+                    head_x, head_y = p.get_head_pos()
+                    if food.check_collision(head_x, head_y):
+                        p.grow()
+                        food.pos = food.generate_new_position()
+                        p.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    score = len(p.segments) - 3
+                    level = score // 10 + 1
+                else:
+                    # Restore previous position/state after hit
+                    p.grid_x, p.grid_y = prev_pos
+                    p.segments = prev_segments
+                    p.max_segments = prev_max_segments
 
             p.display()
             food.display()
-            score = len(p.segments) - 3
             if score > high_score:
                 high_score = score
-            level = score // 10 + 1
             draw_text(f"Score: {score}", text_font, (255, 255, 255), 10, 10)
             draw_text(f"Level: {level}", text_font, (255, 255, 255), 140, 10)
             draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 250, 10)
-            draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
+            draw_text("Lives:", text_font, (255, 255, 255), 10, 480)
             draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
 
         elif game_state.state == "wait":
             screen.fill((0, 0, 0))
-            draw_text("Press SPACE to Start", text_font, (255, 255, 255), WIDTH // 2 - 140, HEIGHT // 2)
+            draw_text("Welcome to The Eel Escapade!", text_font, (255, 255, 255), WIDTH // 2 - 215, HEIGHT // 2)
+            draw_text("Press SPACE to start", text_font, (255, 255, 255), WIDTH // 2 - 137, HEIGHT // 2 + 40)
 
         elif game_state.state == "gameover":
             screen.fill((0, 0, 0))
             draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2 - 70, HEIGHT // 2)
-            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 120, HEIGHT // 2 + 40)
+            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 110, HEIGHT // 2 + 40)
 
         pygame.display.flip()
         fps_clock.tick(fps)
@@ -216,7 +227,6 @@ def main():
     f.close()
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()
