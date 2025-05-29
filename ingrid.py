@@ -50,10 +50,10 @@ class Player:
 
     def display(self) -> None:
         for x, y in self.segments:
-            screen_x = x * TILE_WIDTH + TILE_WIDTH // 2
-            screen_y = y * TILE_HEIGHT + TILE_HEIGHT // 2
-            pygame.draw.circle(
-                self.surface, self.color, (screen_x, screen_y), TILE_WIDTH // 2
+            screen_x = x * TILE_WIDTH
+            screen_y = y * TILE_HEIGHT
+            pygame.draw.rect(
+                self.surface, self.color, (screen_x, screen_y,TILE_WIDTH, TILE_HEIGHT)
             )
 
     def get_head_pos(self):
