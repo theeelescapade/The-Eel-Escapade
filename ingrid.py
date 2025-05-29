@@ -159,6 +159,11 @@ def main():
                 blue = random.randint(0, 255)
                 color_tuple = (red, green, blue)
                 p.color = color_tuple
+                red = random.randint(0, 255)
+                green = random.randint(0, 255)
+                blue = random.randint(0, 255)
+                color_tuple = (red, green, blue)
+                p.color = color_tuple
 
             p.display()
             food.display()
@@ -209,4 +214,4 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
-    main() 
+    main()
