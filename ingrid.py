@@ -124,7 +124,7 @@ class SeaUrchin:
 def draw_bg(surface: pygame.Surface):
     for row in range(ROWS):
         for col in range(COLS):
-            color = (160, 212, 250) if (row + col) % 2 == 0 else (125, 195, 245)
+            color = (113, 212, 217) if (row + col) % 2 == 0 else (67, 197, 204)
             pygame.draw.rect(
                 surface,
                 color,
@@ -159,6 +159,7 @@ def main():
     level = 1
 
     run = True
+    cute_font = pygame.font.Font("Howdy Koala.ttf", 32)
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -210,14 +211,16 @@ def main():
             fps = 6 + (level - 1)
 
         elif game_state.state == "wait":
-            screen.fill((0, 0, 0))
-            draw_text("Welcome to The Eel Escapade!", text_font, (255, 255, 255), WIDTH // 2 - 215, HEIGHT // 2)
-            draw_text("Press SPACE to start", text_font, (255, 255, 255), WIDTH // 2 - 137, HEIGHT // 2 + 40)
+            screen.fill((142, 212, 245))
+
+            draw_text("Welcome to", cute_font, (232,100,170), WIDTH // 2 - 107, HEIGHT // 2 - 80)
+            draw_text("The Eel Escapade!", cute_font, (2,172,191), WIDTH // 2 - 155, HEIGHT // 2 - 30)
+            draw_text("Press SPACE to start", cute_font, (232, 100, 170), WIDTH // 2 - 180, HEIGHT // 2 + 20)
 
         elif game_state.state == "gameover":
-            screen.fill((0, 0, 0))
-            draw_text("Game Over", text_font, (255, 255, 255), WIDTH // 2 - 70, HEIGHT // 2)
-            draw_text("Press R to Restart", text_font, (255, 255, 255), WIDTH // 2 - 110, HEIGHT // 2 + 40)
+            screen.fill((142, 212, 245))
+            draw_text("Game Over", cute_font, (242, 34, 124), WIDTH // 2 - 90, HEIGHT // 2 - 70)
+            draw_text("Press R to Restart", cute_font, (80, 80, 255), WIDTH // 2 - 160, HEIGHT // 2 - 10)
 
         pygame.display.flip()
         fps_clock.tick(fps)
