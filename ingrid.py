@@ -134,6 +134,11 @@ def draw_bg(surface: pygame.Surface):
 def main():
     global high_score
     pygame.init()
+    pygame.mixer.init 
+    pygame.mixer.music.load("DANOIS_-_Tentadora.wav")
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(loops=-1)
+
     fps = 6
     fps_clock = pygame.time.Clock()
     text_font = pygame.font.SysFont("Arial", 30)
@@ -206,7 +211,7 @@ def main():
             draw_text(f"Score: {score}", text_font, (255, 255, 255), 10, 10)
             draw_text(f"Level: {level}", text_font, (255, 255, 255), 140, 10)
             draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 250, 10)
-            draw_text("Lives:", text_font, (255, 255, 255), 10, 480)
+            draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
             draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
 
