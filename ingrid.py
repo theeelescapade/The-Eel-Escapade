@@ -22,7 +22,7 @@ class GameState:
 game_state = GameState()
 
 class Player:
-    def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int, die_sound: pygame.mixer.Sound) -> None:
+    def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int, die_sound: pygame.mixer.Sound, pop_sound: pygame.mixer.Sound) -> None:
         self.surface = surface
         self.grid_x = grid_x
         self.grid_y = grid_y
@@ -31,6 +31,7 @@ class Player:
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
         self.die_sound = die_sound
+        self.pop_sound = pop_sound
         dx, dy = -self.last_direction[0], -self.last_direction[1]
         self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
         self.grid_x, self.grid_y = self.segments[0]
@@ -43,6 +44,7 @@ class Player:
         new_y = self.grid_y + dy
 
         if new_x < 0 or new_x >= COLS or new_y < 0 or new_y >= ROWS:
+            self.pop_sound.play()
             game_state.lives -= 1
             if game_state.lives <= 0:
                 game_state.state = "gameover"
@@ -143,8 +145,10 @@ def main():
     pygame.mixer.music.play(loops=-1)
     eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
     die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
+    pop_sound = pygame.mixer.Sound("161122__reelworldstudio__cartoon-boing.wav")
     eat_sound.set_volume(1)
     die_sound.set_volume(1)
+    pop_sound.set_volume(1)
     
 
     fps = 6
@@ -163,7 +167,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     def new_game(die_sound):
-        return Player(screen, COLS // 2, ROWS // 2, die_sound), SeaUrchin(screen)
+        return Player(screen, COLS // 2, ROWS // 2, die_sound, pop_sound), SeaUrchin(screen)
 
     p, food = new_game(die_sound)
 
