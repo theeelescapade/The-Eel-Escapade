@@ -139,7 +139,6 @@ def draw_bg(surface: pygame.Surface):
 def main():
     global high_score
     pygame.init()
-    pygame.mixer.init 
     pygame.mixer.music.load("DANOIS_-_Tentadora.wav")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(loops=-1)
