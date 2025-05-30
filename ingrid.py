@@ -124,7 +124,7 @@ class SeaUrchin:
 def draw_bg(surface: pygame.Surface):
     for row in range(ROWS):
         for col in range(COLS):
-            color = (65, 160, 200) if (row + col) % 2 == 0 else (67, 130, 225)
+            color = (160, 212, 250) if (row + col) % 2 == 0 else (125, 195, 245)
             pygame.draw.rect(
                 surface,
                 color,
