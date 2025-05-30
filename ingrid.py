@@ -22,7 +22,7 @@ class GameState:
 game_state = GameState()
 
 class Player:
-    def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int) -> None:
+    def __init__(self, surface: pygame.Surface, grid_x: int, grid_y: int, die_sound: pygame.mixer.Sound) -> None:
         self.surface = surface
         self.grid_x = grid_x
         self.grid_y = grid_y
@@ -30,6 +30,7 @@ class Player:
         self.last_direction = (0, 1)
         self.max_segments = 3
         self.color: tuple[int, int, int] = (0, 0, 255)
+        self.die_sound = die_sound
         dx, dy = -self.last_direction[0], -self.last_direction[1]
         self.segments = [(self.grid_x + dx * i, self.grid_y + dy * i) for i in range(self.max_segments)]
         self.grid_x, self.grid_y = self.segments[0]
@@ -45,6 +46,7 @@ class Player:
             game_state.lives -= 1
             if game_state.lives <= 0:
                 game_state.state = "gameover"
+                self.die_sound.play()
             else:
                 self.direction = (0, 0)
             return
@@ -53,6 +55,7 @@ class Player:
             game_state.lives -= 1
             if game_state.lives <= 0:
                 game_state.state = "gameover"
+                self.die_sound.play()
             else:
                 self.direction = (0, 0)
             return
@@ -138,6 +141,11 @@ def main():
     pygame.mixer.music.load("DANOIS_-_Tentadora.wav")
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(loops=-1)
+    eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
+    die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
+    eat_sound.set_volume(1)
+    die_sound.set_volume(1)
+    
 
     fps = 6
     fps_clock = pygame.time.Clock()
@@ -154,10 +162,11 @@ def main():
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-    def new_game():
-        return Player(screen, COLS // 2, ROWS // 2), SeaUrchin(screen)
+    def new_game(die_sound):
+        return Player(screen, COLS // 2, ROWS // 2, die_sound), SeaUrchin(screen)
 
-    p, food = new_game()
+    p, food = new_game(die_sound)
+
     game_state.state = "wait"
     game_state.lives = 3
     score = 0
@@ -177,7 +186,7 @@ def main():
                     p.keyboard_control(event)
                 elif game_state.state == "gameover":
                     if event.key == pygame.K_r:
-                        p, food = new_game()
+                        p, food = new_game(die_sound)
                         game_state.state = "wait"
                         game_state.lives = 3
                         score = 0
@@ -196,6 +205,7 @@ def main():
                         p.grow()
                         food.pos = food.generate_new_position()
                         p.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                        eat_sound.play()
                     score = len(p.segments) - 3
                     level = score // 10 + 1
                 else:
