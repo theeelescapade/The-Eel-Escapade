@@ -54,6 +54,7 @@ class Player:
             return
 
         if (new_x, new_y) in self.segments[1:]:
+            self.pop_sound.play()
             game_state.lives -= 1
             if game_state.lives <= 0:
                 game_state.state = "gameover"
@@ -139,15 +140,15 @@ def draw_bg(surface: pygame.Surface):
 def main():
     global high_score
     pygame.init()
-    pygame.mixer.music.load("DANOIS_-_Tentadora.wav")
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.load("extremeaction.mp3")
+    pygame.mixer.music.set_volume(0.1)
     pygame.mixer.music.play(loops=-1)
     eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
     die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
-    pop_sound = pygame.mixer.Sound("161122__reelworldstudio__cartoon-boing.wav")
-    eat_sound.set_volume(1)
-    die_sound.set_volume(1)
-    pop_sound.set_volume(1)
+    pop_sound = pygame.mixer.Sound("731262__sdroliasnick__cartoon-sound-single-boing.mp3")
+    eat_sound.set_volume(5)
+    die_sound.set_volume(4)
+    pop_sound.set_volume(16)
     
 
     fps = 6
@@ -222,8 +223,8 @@ def main():
             if score > high_score:
                 high_score = score
             draw_text(f"Score: {score}", text_font, (255, 255, 255), 10, 10)
-            draw_text(f"Level: {level}", text_font, (255, 255, 255), 140, 10)
-            draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 250, 10)
+            draw_text(f"Level: {level}", text_font, (255, 255, 255), 160, 10)
+            draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 280, 10)
             draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
             draw_lives(game_state.lives, text_font, 100, 480)
             fps = 6 + (level - 1)
