@@ -167,10 +167,27 @@ class SeaUrchin:
         )
 
     def display(self):
-        pygame.draw.circle(
-            self.surface, (255, 0, 0), (int(self.pos[0]), int(self.pos[1])), 10
-        )
+        (x,y) = (int(self.pos[0])-TILE_WIDTH//2, int(self.pos[1])-TILE_HEIGHT//2)
 
+        centofh = y+TILE_HEIGHT//2
+        centofw = x+TILE_WIDTH//2
+        fourthw = x+TILE_WIDTH//4
+        thfourw = x+TILE_WIDTH-TILE_WIDTH//4
+        fourthh = y+TILE_WIDTH//4
+        thfourh = y+TILE_WIDTH-TILE_WIDTH//4
+        fullx = x+TILE_WIDTH
+        fully = y+TILE_HEIGHT
+
+        pygame.draw.circle(self.surface, (0,0,0), (centofw, centofh), (TILE_WIDTH//4))
+        pygame.draw.polygon(self.surface, (0,0,0), ((x,y), (centofw, fourthh),(fourthw , centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fourthw, centofh),(centofw, y), (thfourw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fullx, y), (thfourw, centofh), (centofw, fourthh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, fourthh), (fullx, centofh), (centofw, thfourh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((thfourw,centofh), (fullx,fully), (centofw,thfourh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fourthw, centofh),(centofw, fully), (thfourw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, thfourh), (x, fully), (fourthw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, fourthh), (x, centofh), (centofw, thfourh)))
+        
     def check_collision(self, head_x, head_y) -> bool:
         dist = math.hypot(head_x - self.pos[0], head_y - self.pos[1])
         return dist < TILE_WIDTH // 2
