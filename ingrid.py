@@ -81,12 +81,32 @@ class Player:
                     self.first_move_done = True  
 
     def display(self) -> None:
-        for x, y in self.segments:
+        for i, (x,y) in enumerate(self.segments):
             screen_x = x * TILE_WIDTH
             screen_y = y * TILE_HEIGHT
-            pygame.draw.rect(
-                self.surface, self.color, (screen_x, screen_y,TILE_WIDTH, TILE_HEIGHT)
-            )
+
+            if i == 0:
+                dirx, diry = self.last_direction
+
+                centoftilew = screen_x + TILE_WIDTH//2
+                centoftileh = screen_y + TILE_HEIGHT//2
+
+                if (dirx,diry) == (0,1): 
+                    pygame.draw.rect(self.surface, self.color, (screen_x, screen_y, TILE_WIDTH, TILE_HEIGHT//2))
+
+                if (dirx,diry) == (0,-1): 
+                    pygame.draw.rect(self.surface, self.color, (screen_x, centoftileh, TILE_WIDTH, TILE_HEIGHT//2))
+
+                if (dirx,diry) == (1,0): 
+                    pygame.draw.rect(self.surface, self.color, (screen_x, screen_y, TILE_WIDTH//2, TILE_HEIGHT))
+
+                if (dirx,diry) == (-1,0): 
+                    pygame.draw.rect(self.surface, self.color, (centoftilew, screen_y, TILE_WIDTH//2, TILE_HEIGHT))
+
+                pygame.draw.circle(self.surface, self.color,(centoftilew, centoftileh), TILE_WIDTH//2)
+
+            else:
+                pygame.draw.rect(self.surface, self.color, (screen_x, screen_y,TILE_WIDTH, TILE_HEIGHT))
 
     def get_head_pos(self):
         head_x = self.grid_x * TILE_WIDTH + TILE_WIDTH // 2
