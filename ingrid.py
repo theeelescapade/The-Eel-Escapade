@@ -194,9 +194,9 @@ def main():
     eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
     die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
     pop_sound = pygame.mixer.Sound("731262__sdroliasnick__cartoon-sound-single-boing.mp3")
-    eat_sound.set_volume(5)
-    die_sound.set_volume(4)
-    pop_sound.set_volume(16)
+    eat_sound.set_volume(0.4)
+    die_sound.set_volume(0.5)
+    pop_sound.set_volume(1.3)
     
 
     fps = 6
