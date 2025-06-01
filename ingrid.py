@@ -103,19 +103,28 @@ class Player:
             if i == 0:
                 dirx, diry = self.last_direction
 
+                pygame.draw.circle(self.surface, self.color,(centoftilew, centoftileh), TILE_WIDTH//2)
+
                 if (dirx,diry) == (0,1): 
                     pygame.draw.rect(self.surface, self.color, (screen_x, screen_y, TILE_WIDTH, TILE_HEIGHT//2))
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+TILE_WIDTH//4, screen_y+(TILE_HEIGHT//4)*3), TILE_WIDTH//8)
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+(TILE_WIDTH-TILE_WIDTH//4), screen_y+(TILE_HEIGHT//4)*3), TILE_WIDTH//8)
 
                 if (dirx,diry) == (0,-1): 
                     pygame.draw.rect(self.surface, self.color, (screen_x, centoftileh, TILE_WIDTH, TILE_HEIGHT//2))
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+TILE_WIDTH//4, screen_y+TILE_HEIGHT//4), TILE_WIDTH//8)
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+(TILE_WIDTH-TILE_WIDTH//4), screen_y+TILE_HEIGHT//4), TILE_WIDTH//8)
 
                 if (dirx,diry) == (1,0): 
                     pygame.draw.rect(self.surface, self.color, (screen_x, screen_y, TILE_WIDTH//2, TILE_HEIGHT))
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+(TILE_WIDTH-TILE_WIDTH//4), screen_y+TILE_HEIGHT//4), TILE_WIDTH//8)
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+(TILE_WIDTH-TILE_WIDTH//4), screen_y+(TILE_HEIGHT-TILE_HEIGHT//4)), TILE_WIDTH//8)
+
 
                 if (dirx,diry) == (-1,0): 
                     pygame.draw.rect(self.surface, self.color, (centoftilew, screen_y, TILE_WIDTH//2, TILE_HEIGHT))
-
-                pygame.draw.circle(self.surface, self.color,(centoftilew, centoftileh), TILE_WIDTH//2)
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+TILE_WIDTH//4, screen_y+TILE_HEIGHT//4), TILE_WIDTH//8)
+                    pygame.draw.circle(self.surface, (0,0,0), (screen_x+TILE_WIDTH//4, screen_y+(TILE_HEIGHT-TILE_HEIGHT//4)), TILE_WIDTH//8)
 
             elif i == len(self.segments)-1:
                 prevgridx, prevgridy = self.segments[i-1]
