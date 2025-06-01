@@ -97,11 +97,11 @@ class Player:
             screen_x = x * TILE_WIDTH
             screen_y = y * TILE_HEIGHT
 
+            centoftilew = screen_x + TILE_WIDTH//2
+            centoftileh = screen_y + TILE_HEIGHT//2
+
             if i == 0:
                 dirx, diry = self.last_direction
-
-                centoftilew = screen_x + TILE_WIDTH//2
-                centoftileh = screen_y + TILE_HEIGHT//2
 
                 if (dirx,diry) == (0,1): 
                     pygame.draw.rect(self.surface, self.color, (screen_x, screen_y, TILE_WIDTH, TILE_HEIGHT//2))
@@ -117,6 +117,23 @@ class Player:
 
                 pygame.draw.circle(self.surface, self.color,(centoftilew, centoftileh), TILE_WIDTH//2)
 
+            elif i == len(self.segments)-1:
+                prevgridx, prevgridy = self.segments[i-1]
+                tailgridx = x - prevgridx
+                tailgridy = y - prevgridy
+
+                if (tailgridx,tailgridy) == (0,1):
+                    pygame.draw.polygon(self.surface, self.color, ((screen_x, screen_y), (centoftilew,screen_y+TILE_HEIGHT),(screen_x+TILE_WIDTH,screen_y) ))
+
+                if (tailgridx,tailgridy) == (0,-1):
+                    pygame.draw.polygon(self.surface, self.color, ((screen_x, screen_y+TILE_HEIGHT), (centoftilew,screen_y),(screen_x+TILE_WIDTH,screen_y+TILE_HEIGHT) ))
+
+                if (tailgridx,tailgridy) == (-1,0):
+                    pygame.draw.polygon(self.surface, self.color, ((screen_x+TILE_WIDTH, screen_y), (screen_x,centoftileh),(screen_x+TILE_WIDTH,screen_y+TILE_HEIGHT) ))
+
+                if (tailgridx,tailgridy) == (1,0):
+                    pygame.draw.polygon(self.surface, self.color, ((screen_x, screen_y), (screen_x+TILE_WIDTH,centoftileh),(screen_x,screen_y+TILE_HEIGHT) ))
+
             else:
                 pygame.draw.rect(self.surface, self.color, (screen_x, screen_y,TILE_WIDTH, TILE_HEIGHT))
 
@@ -130,6 +147,8 @@ class SeaUrchin:
         self.surface = surface
         self.pos = self.generate_new_position()
 
+
+    #ISSUE HERE IS THAT THE URCHIN WILL GENERATE ON TOP OF THE SNAKE BODY WHICH CANNOT BE OK
     def generate_new_position(self):
         grid_x = random.randint(0, COLS - 1)
         grid_y = random.randint(0, ROWS - 1)
