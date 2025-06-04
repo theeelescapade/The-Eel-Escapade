@@ -186,6 +186,9 @@ def draw_bg(surface: pygame.Surface):
             )
 
 def main():
+    level_up_text = ""
+    level_up_time = 0
+    level_up_duration = 3000
     global high_score
     pygame.init()
     pygame.mixer.music.load("extremeaction.mp3")
@@ -223,6 +226,7 @@ def main():
     game_state.lives = 3
     score = 0
     level = 1
+    prev_level = level 
 
     run = True
     cute_font = pygame.font.Font("Howdy Koala.ttf", 32)
@@ -260,6 +264,10 @@ def main():
                         eat_sound.play()
                     score = len(p.segments) - 3
                     level = score // 10 + 1
+                    if level > prev_level and level > 1:
+                        level_up_text = "You leveled up!"
+                        level_up_time = pygame.time.get_ticks()
+                    prev_level = level 
                 else:
                     
                     p.grid_x, p.grid_y = prev_pos
@@ -275,6 +283,15 @@ def main():
             draw_text(f"High Score: {high_score}", text_font, (255, 255, 255), 280, 10)
             draw_text("Lives:", text_font, (255, 255, 255), 10, 480 )
             draw_lives(game_state.lives, text_font, 100, 480)
+            if level_up_text: 
+                time_since = pygame.time.get_ticks() - level_up_time
+                if time_since < level_up_duration:
+                    alpha = max(0, 255 - int((time_since / level_up_duration) * 255))
+                    level_up_surface = cute_font.render(level_up_text, True, (255, 255, 0))
+                    level_up_surface.set_alpha(alpha)
+                    screen.blit(level_up_surface, (WIDTH // 2 - level_up_surface.get_width() // 2, HEIGHT // 2 - 100))
+                else:
+                    level_up_text = ""
             fps = 6 + (level - 1)
 
         elif game_state.state == "wait":
