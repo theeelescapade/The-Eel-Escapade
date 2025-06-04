@@ -151,26 +151,46 @@ class Player:
         head_y = self.grid_y * TILE_HEIGHT + TILE_HEIGHT // 2
         return head_x, head_y
 
+
 class SeaUrchin:
-    def __init__(self, surface: pygame.Surface):
+    def __init__(self, surface: pygame.Surface, player: Player):
         self.surface = surface
+        self.player = player
         self.pos = self.generate_new_position()
 
-
-    #ISSUE HERE IS THAT THE URCHIN WILL GENERATE ON TOP OF THE SNAKE BODY WHICH CANNOT BE OK
     def generate_new_position(self):
-        grid_x = random.randint(0, COLS - 1)
-        grid_y = random.randint(0, ROWS - 1)
-        return (
-            grid_x * TILE_WIDTH + TILE_WIDTH // 2,
-            grid_y * TILE_HEIGHT + TILE_HEIGHT // 2,
-        )
+        while True:
+            grid_x = random.randint(0, COLS - 1)
+            grid_y = random.randint(0, ROWS - 1)
+            if (grid_x, grid_y) not in self.player.segments:
+                return (
+                    grid_x * TILE_WIDTH + TILE_WIDTH // 2,
+                    grid_y * TILE_HEIGHT + TILE_HEIGHT // 2,
+                )
+
 
     def display(self):
-        pygame.draw.circle(
-            self.surface, (255, 0, 0), (int(self.pos[0]), int(self.pos[1])), 10
-        )
+        (x,y) = (int(self.pos[0])-TILE_WIDTH//2, int(self.pos[1])-TILE_HEIGHT//2)
 
+        centofh = y+TILE_HEIGHT//2
+        centofw = x+TILE_WIDTH//2
+        fourthw = x+TILE_WIDTH//4
+        thfourw = x+TILE_WIDTH-TILE_WIDTH//4
+        fourthh = y+TILE_WIDTH//4
+        thfourh = y+TILE_WIDTH-TILE_WIDTH//4
+        fullx = x+TILE_WIDTH
+        fully = y+TILE_HEIGHT
+
+        pygame.draw.circle(self.surface, (0,0,0), (centofw, centofh), (TILE_WIDTH//4))
+        pygame.draw.polygon(self.surface, (0,0,0), ((x,y), (centofw, fourthh),(fourthw , centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fourthw, centofh),(centofw, y), (thfourw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fullx, y), (thfourw, centofh), (centofw, fourthh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, fourthh), (fullx, centofh), (centofw, thfourh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((thfourw,centofh), (fullx,fully), (centofw,thfourh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((fourthw, centofh),(centofw, fully), (thfourw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, thfourh), (x, fully), (fourthw, centofh)))
+        pygame.draw.polygon(self.surface, (0,0,0), ((centofw, fourthh), (x, centofh), (centofw, thfourh)))
+        
     def check_collision(self, head_x, head_y) -> bool:
         dist = math.hypot(head_x - self.pos[0], head_y - self.pos[1])
         return dist < TILE_WIDTH // 2
@@ -192,14 +212,14 @@ def main():
     global high_score
     pygame.init()
     pygame.mixer.music.load("extremeaction.mp3")
-    pygame.mixer.music.set_volume(0.1)
+    pygame.mixer.music.set_volume(0.6)
     pygame.mixer.music.play(loops=-1)
     eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
     die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
     pop_sound = pygame.mixer.Sound("731262__sdroliasnick__cartoon-sound-single-boing.mp3")
-    eat_sound.set_volume(5)
-    die_sound.set_volume(4)
-    pop_sound.set_volume(16)
+    eat_sound.set_volume(2.5)
+    die_sound.set_volume(2.5)
+    pop_sound.set_volume(3)
     
 
     fps = 6
@@ -217,8 +237,21 @@ def main():
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
+    coral_img = pygame.image.load("coral_png.png")
+    coral_img = pygame.transform.scale(coral_img, (TILE_WIDTH, TILE_HEIGHT))
+
+    coral_positions = []
+    for _ in range(6): 
+        x = random.randint(0, COLS - 1)
+        y = random.randint(0, ROWS - 1)
+        coral_positions.append((x, y))
+
+
     def new_game(die_sound):
-        return Player(screen, COLS // 2, ROWS // 2, die_sound, pop_sound), SeaUrchin(screen)
+        player = Player(screen, COLS // 2, ROWS // 2, die_sound, pop_sound)
+        food = SeaUrchin(screen, player)
+        return player, food
+
 
     p, food = new_game(die_sound)
 
@@ -250,6 +283,8 @@ def main():
 
         if game_state.state == "gameon":
             draw_bg(screen)
+            for (x, y) in coral_positions:
+                screen.blit(coral_img, (x * TILE_WIDTH, y * TILE_HEIGHT))
             if p.direction != (0, 0):
                 prev_pos = p.grid_x, p.grid_y
                 prev_segments = p.segments[:]
