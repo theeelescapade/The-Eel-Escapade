@@ -151,20 +151,23 @@ class Player:
         head_y = self.grid_y * TILE_HEIGHT + TILE_HEIGHT // 2
         return head_x, head_y
 
+
 class SeaUrchin:
-    def __init__(self, surface: pygame.Surface):
+    def __init__(self, surface: pygame.Surface, player: Player):
         self.surface = surface
+        self.player = player
         self.pos = self.generate_new_position()
 
-
-    #ISSUE HERE IS THAT THE URCHIN WILL GENERATE ON TOP OF THE SNAKE BODY WHICH CANNOT BE OK
     def generate_new_position(self):
-        grid_x = random.randint(0, COLS - 1)
-        grid_y = random.randint(0, ROWS - 1)
-        return (
-            grid_x * TILE_WIDTH + TILE_WIDTH // 2,
-            grid_y * TILE_HEIGHT + TILE_HEIGHT // 2,
-        )
+        while True:
+            grid_x = random.randint(0, COLS - 1)
+            grid_y = random.randint(0, ROWS - 1)
+            if (grid_x, grid_y) not in self.player.segments:
+                return (
+                    grid_x * TILE_WIDTH + TILE_WIDTH // 2,
+                    grid_y * TILE_HEIGHT + TILE_HEIGHT // 2,
+                )
+
 
     def display(self):
         (x,y) = (int(self.pos[0])-TILE_WIDTH//2, int(self.pos[1])-TILE_HEIGHT//2)
@@ -231,8 +234,21 @@ def main():
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
+    coral_img = pygame.image.load("coral_png.png")
+    coral_img = pygame.transform.scale(coral_img, (TILE_WIDTH, TILE_HEIGHT))
+
+    coral_positions = []
+    for _ in range(6): 
+        x = random.randint(0, COLS - 1)
+        y = random.randint(0, ROWS - 1)
+        coral_positions.append((x, y))
+
+
     def new_game(die_sound):
-        return Player(screen, COLS // 2, ROWS // 2, die_sound, pop_sound), SeaUrchin(screen)
+        player = Player(screen, COLS // 2, ROWS // 2, die_sound, pop_sound)
+        food = SeaUrchin(screen, player)
+        return player, food
+
 
     p, food = new_game(die_sound)
 
@@ -263,6 +279,8 @@ def main():
 
         if game_state.state == "gameon":
             draw_bg(screen)
+            for (x, y) in coral_positions:
+                screen.blit(coral_img, (x * TILE_WIDTH, y * TILE_HEIGHT))
             if p.direction != (0, 0):
                 prev_pos = p.grid_x, p.grid_y
                 prev_segments = p.segments[:]
