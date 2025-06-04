@@ -212,14 +212,14 @@ def main():
     global high_score
     pygame.init()
     pygame.mixer.music.load("extremeaction.mp3")
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(loops=-1)
     eat_sound = pygame.mixer.Sound("186552__jazzvoon__snack_bite-1.wav")
     die_sound = pygame.mixer.Sound("415079__harrietniamh__video-game-death-sound-effect.wav")
     pop_sound = pygame.mixer.Sound("731262__sdroliasnick__cartoon-sound-single-boing.mp3")
     eat_sound.set_volume(1)
-    die_sound.set_volume(0.5)
-    pop_sound.set_volume(0.8)
+    die_sound.set_volume(0.7)
+    pop_sound.set_volume(0.7)
     
 
     fps = 6
